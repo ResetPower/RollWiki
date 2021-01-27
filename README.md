@@ -1,3 +1,4 @@
+现在是英语，如果你需要中文 [请点击这里](https://github.com/azurestar-space/RollWiki/blob/master/README_zh-cn.md)
 # RollWiki
 A Simple Single Page Wiki Software.
 ## Environment
