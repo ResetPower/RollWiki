@@ -2,3 +2,4 @@ settings.json
 RollWiki/__pycache__/
 RollWikiApp/__pycache__/
 .idea/
+db.sqlite3
