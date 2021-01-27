@@ -1,9 +1,10 @@
 {
   "database": {
-    "host": "rm-bp1ov68wy609veej9om.mysql.rds.aliyuncs.com",
+    "type": "mysql",
+    "host": "127.0.0.1",
     "port": 3306,
     "user": "root",
-    "password": "Keys051123",
+    "password": "12345678",
     "schema": "rollwiki"
   },
   "site": {

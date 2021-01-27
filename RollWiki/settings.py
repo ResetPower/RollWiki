@@ -14,8 +14,11 @@ import os
 from pathlib import Path
 
 # Import settings from settings.json
-_settings_file = open('settings.json')
+_settings_file = open('settings.json', encoding='utf-8')
 _settings = json.loads(_settings_file.read())
+db = 'mysql'
+if 'type' in _settings['database']:
+    db = _settings['database']['type']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
@@ -31,7 +34,7 @@ SECRET_KEY = 'keqpii^w_#8=wln5auhvk(((t0495f@5$4-0kc*2+-in=_4+*q'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -80,19 +83,27 @@ WSGI_APPLICATION = 'RollWiki.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': _settings['database']['schema'],
-        'HOST': _settings['database']['host'],
-        'USER': _settings['database']['user'],
-        'PASSWORD': _settings['database']['password'],
-        'PORT': _settings['database']['port'],
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        },
+if db == 'mysql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': _settings['database']['schema'],
+            'HOST': _settings['database']['host'],
+            'USER': _settings['database']['user'],
+            'PASSWORD': _settings['database']['password'],
+            'PORT': _settings['database']['port'],
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+            },
+        }
     }
-}
+elif db == 'sqlite3':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': _settings['database']['name'],
+        }
+    }
 
 
 # Password validation
