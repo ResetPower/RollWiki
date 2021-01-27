@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@1.0.1/dist/css/mdui.min.css"/>
+    <title></title>
+    <script src="https://cdn.jsdelivr.net/npm/js-base64@3.4.5/base64.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/cube-i18n.js"></script>
+    <script src="/static/lwjsk.js"></script>
+</head>
+<body class="mdui-drawer-body-left mdui-appbar-with-toolbar">
+    <div class="mdui-drawer mdui-shadow-12" id="drawer">
+        <ul class="mdui-list">
+            <li class="mdui-list-item mdui-ripple" id="list-home">
+                <i class="mdui-list-item-icon mdui-icon material-icons">home</i>
+                <div class="mdui-list-item-content" i18n="pages.home"></div>
+            </li>
+        </ul>
+        <div class="mdui-divider"></div>
+        <wrapper id="other-languages"></wrapper>
+    </div>
+    <div class="mdui-appbar mdui-appbar-fixed">
+        <div class="mdui-toolbar mdui-color-light-blue mdui-text-color-white">
+            <button class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#drawer'}"><i class="mdui-icon material-icons">menu</i></button>
+            <div class="mdui-toolbar-spacer"></div>
+            <div class="mdui-textfield">
+                <i class="mdui-icon material-icons" style="cursor: pointer;" onclick="search()">search</i>
+                <label for="head.search"></label>
+                <input class="mdui-textfield-input mdui-text-color-white" type="text" id="head.search" i18n="[placeholder]head.search"/>
+            </div>
+            <button class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">more_vert</i></button>
+        </div>
+    </div>
+    <div class="mdui-container" id="context">
+        <div class="mdui-spinner" style="margin-top: 20px;"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.1/dist/js/mdui.min.js"></script>
+</body>
+<script>
+    let site = {{ site|safe }};
+    let uri = []
+    let lang = ''
+    let searchBar = $('head.search')
+    let otherLanguages = $('other-languages')
+    let context = $('context')
+    let languageResource = {}
+    let listHome = $("list-home")
+
+    function reload() {
+        uri = location.pathname.split('/').filter(function (e) {return e!==''})
+        lang = uri[0]
+        document.title = site['name'][lang]
+        if (lang === 'en') {
+            otherLanguages.innerHTML = `<li class="mdui-list-item mdui-ripple" onclick='jump("/zh/home")'>中文</li>`
+        } else if (lang === 'zh') {
+            otherLanguages.innerHTML = `<li class="mdui-list-item mdui-ripple" onclick='jump("/en/home")'>English</li>`
+        }
+        languageResource = i18n({
+            path: 'static/lang',
+            language: lang,
+            args: '20210126'
+        })
+
+        let q = decodeURIComponent(uri[2])
+        switch (uri[1]) {
+            case 'home':
+                listHome.classList.add("mdui-list-item-active")
+                get('/api/'+lang+'/wiki/home', function (stat, data) {
+                    if (stat === 200) {
+                        let param = JSON.parse(data)
+                        let content = Base64.decode(param['content'])
+                        let time = param['time']
+                        let author = param['author']
+                        context.innerHTML = `${marked(content)}<br/><p>${time} | ${author}</p>`
+                    } else {
+                        context.innerHTML = `<h1>404 Not Found</h1><p>${languageResource['words.sorry']}, ${languageResource['words.wiki-not-found'].replace('%title%', 'home')}</p>`
+                    }
+                })
+                break;
+            case 'wiki':
+                listHome.classList.remove("mdui-list-item-active")
+                if (isNotEmpty(q)) {
+                    get('/api/'+lang+'/wiki/'+q, function (stat, data) {
+                        if (stat === 200) {
+                            let param = JSON.parse(data)
+                            let content = Base64.decode(param['content'])
+                            let time = param['time']
+                            let author = param['author']
+                            context.innerHTML = `${marked(content)}<br/><p>${time} | ${author}</p>`
+                        } else {
+                            context.innerHTML = `<h1>404 Not Found</h1><p>${languageResource['words.sorry']}, ${languageResource['words.wiki-not-found'].replace('%title%', q)}</p>`
+                        }
+                    })
+                } else {
+                    context.innerHTML = `<h1>404 Not Found</h1><p>${languageResource['words.sorry']}, ${languageResource['words.wiki-not-found'].replace('%title%', '')}</p>`
+                }
+                document.title = q+' / '+site['name'][lang]
+                break;
+            case 'doc':
+                listHome.classList.remove("mdui-list-item-active")
+                if (isNotEmpty(q)) {
+                    get('/api/'+lang+'/doc/'+q, function (stat, data) {
+                        if (stat === 200) {
+                            let param = JSON.parse(data)
+                            let content = Base64.decode(param['content'])
+                            let time = param['time']
+                            let author = param['author']
+                            context.innerHTML = `${marked(content)}<br/><p>${time} | ${author}</p>`
+                        } else {
+                            context.innerHTML = `<h1>404 Not Found</h1><p>${languageResource['words.sorry']}, ${languageResource['words.doc-not-found'].replace('%title%', q)}</p>`
+                        }
+                    })
+                } else {
+                    context.innerHTML = `<h1>404 Not Found</h1><p>${languageResource['words.sorry']}, ${languageResource['words.doc-not-found'].replace('%title%', '')}</p>`
+                }
+                document.title = q+' / '+site['name'][lang]
+                break;
+            case 'media':
+                listHome.classList.remove("mdui-list-item-active")
+                break;
+            case 'search':
+                listHome.classList.remove("mdui-list-item-active")
+                break;
+        }
+    }
+    function search() {
+        let v = searchBar.value
+        if (isNotEmpty(v)) {
+            window.alert('Search is not supported yet.')
+        }
+    }
+
+    reload()
+    listHome.onclick = function () {
+        jump('/'+lang+'/home')
+    }
+    searchBar.onkeydown = function (ev) {
+        if (ev.code === 'Enter') { search() }
+    }
+    window.addEventListener('popstate', reload)
+</script>
+</html>

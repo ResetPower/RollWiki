@@ -1,0 +1,16 @@
+{
+  "database": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "root",
+    "password": "391G8H190D",
+    "schema": "rollwiki"
+  },
+  "site": {
+    "logo": "/staitc/RollWiki.png",
+    "name": {
+      "en": "RollWiki",
+      "zh": "卷子维基"
+    }
+  }
+}
