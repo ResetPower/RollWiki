@@ -16,10 +16,6 @@ MySQL 或 SQLite3 (需要)
 pip install django
 pip install mysqlclient # 如果你使用MySQL, 安装它
 ```
-### 注释
-
-如果你想要使用 sqlite3, 就在settings.json将 `database.type` 改为 `sqlite3` 并设置 `database.name` 为你的文件路径
-
 ## 支持语言
 
 英语 (en)
