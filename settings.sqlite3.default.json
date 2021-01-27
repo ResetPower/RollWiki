@@ -1,7 +1,7 @@
 {
   "database": {
     "type": "sqlite3",
-    "name": "db.sqlite3",
+    "name": "db.sqlite3"
   },
   "site": {
     "logo": "/staitc/RollWiki.png",
